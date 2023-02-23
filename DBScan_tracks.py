@@ -245,6 +245,8 @@ for event in eventData:
         draw_boundaries(ax)
         draw_labels(ax)  
         plt.scatter(x_centers,y_centers, s=30, c='k') 
+        for i in range(0,len(x_centers)):
+            plt.text(x_centers[i],y_centers[i],'  Q = '+str(round(q_totals[i])))
         plt.show()
         t_num += 1
         event_num +=1
