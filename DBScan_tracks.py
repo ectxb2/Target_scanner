@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import h5py
 import sys
 from sklearn.cluster import DBSCAN
+from collections import Counter
 
 #ex:
 # python3 DBScan_tracks.py selftrigger_2022_08_05_00_04_09_PDT_evd.h5 3,6,8,78
@@ -111,14 +112,6 @@ def draw_labels(ax):
     plt.tight_layout()
     
 
-'''
-for event in eventData:
-    ax = draw_hits_in_event_window_by_timestamp(event)
-    # ax = draw_hits_in_event_window_by_reference(event)
-    draw_boundaries(ax)
-    draw_labels(ax)
-
-    plt.show()'''
     
 event_num = 0
 t_num = 0
@@ -127,21 +120,6 @@ t = sys.argv[2].split(',')
 t = [eval(i) for i in t]
 
 #plot tracks:
-'''
-for event in eventData:
-    if event_num == t[t_num]:
-        print(event_num)
-        ax = draw_hits_in_event_window_by_timestamp(event)
-        # ax = draw_hits_in_event_window_by_reference(event)
-        draw_boundaries(ax)
-        draw_labels(ax)
-        plt.show()
-        t_num += 1
-        event_num +=1
-    else :
-        event_num +=1
-        #print(event_num)
-'''
 
 #xseed = sys.argv[3].split(',')
 #xseed = [eval(i) for i in t]
@@ -170,7 +148,8 @@ def make_colors(array):
         elif cluster == 4:
             out += ['m']
     return out
-         
+  
+       
 
 def draw_hits_dbscaned(event):
     """
@@ -187,9 +166,10 @@ def draw_hits_dbscaned(event):
     px = eventHits['px']
     py = eventHits['py']
     ts = eventHits['ts']
-
+    q = eventHits['q']
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    
     
     eventID = event['id']
     eventMask = eventHitRefs[:,0] == eventID
@@ -202,6 +182,7 @@ def draw_hits_dbscaned(event):
         
     db = DBSCAN(eps = dist, min_samples=4).fit(xy_tracks)
     labels = db.labels_
+    
     #core_samples = db.core_sample_indices_
     #n_clusters = len(set(labels)) - (1 if -1 in labels else 0) 
     color_array = make_colors(labels)
@@ -209,18 +190,61 @@ def draw_hits_dbscaned(event):
     
     return ax
 
+#center/average finding
+def find_centers(db,px,py,q):
+    labels = db.labels_
+    n_clusters = len(set(labels)) - (1 if -1 in labels else 0) 
+    x_centers = []
+    y_centers = []
+    q_totals = []
+    for cluster_number in range(0,n_clusters):
+        x_tot = 0
+        y_tot = 0
+        q_tot = 0    
+        xcounts = 0
+        ycounts = 0
+        for i in range(0,len(labels)):
+            if cluster_number == labels[i]:
+                q_tot += q[i]
+                x_tot += px[i]
+                y_tot += py[i]
+                xcounts += 1
+                ycounts += 1
+        x_ave = x_tot/xcounts
+        y_ave = y_tot/ycounts
+        x_centers += [x_ave]
+        y_centers += [y_ave]
+        q_totals += [q_tot]
 
+    return  x_centers,y_centers,q_totals
+     
+    
+    
 for event in eventData:
     if event_num == t[t_num]:
-
+        t0 = event['ts_start']
+        tf = event['ts_end']
+        eventMask = ( t0 <= hitData['ts']) & (hitData['ts'] < tf ) 
+        eventHits = hitData[eventMask]
+        px = eventHits['px']
+        py = eventHits['py']
+        ts = eventHits['ts']
+        q = eventHits['q'] 
+        xy_tracks = np.array([px,py]).T 
+        db = DBSCAN(eps = dist, min_samples=4).fit(xy_tracks)
+        x_centers , y_centers , q_totals = find_centers(db,px,py,q)
+        #Draw regular 2d charge projection
         ax = draw_hits_in_event_window_by_timestamp(event)
         draw_boundaries(ax)
         draw_labels(ax)
         plt.show()
+        #Draw clusters and centers
         
         ax = draw_hits_dbscaned(event)
+        
         draw_boundaries(ax)
-        draw_labels(ax)    
+        draw_labels(ax)  
+        plt.scatter(x_centers,y_centers, s=30, c='k') 
         plt.show()
         t_num += 1
         event_num +=1
