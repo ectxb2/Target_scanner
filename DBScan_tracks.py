@@ -190,7 +190,7 @@ def draw_hits_dbscaned(event):
     
     return ax
 
-#center/average finding
+#center/average finding using weigted average
 def find_centers(db,px,py,q):
     labels = db.labels_
     n_clusters = len(set(labels)) - (1 if -1 in labels else 0) 
@@ -203,15 +203,16 @@ def find_centers(db,px,py,q):
         q_tot = 0    
         xcounts = 0
         ycounts = 0
+        
         for i in range(0,len(labels)):
             if cluster_number == labels[i]:
                 q_tot += q[i]
-                x_tot += px[i]
-                y_tot += py[i]
+                x_tot += px[i]*q[i]
+                y_tot += py[i]*q[i]
                 xcounts += 1
                 ycounts += 1
-        x_ave = x_tot/xcounts
-        y_ave = y_tot/ycounts
+        x_ave = x_tot/q_tot
+        y_ave = y_tot/q_tot
         x_centers += [x_ave]
         y_centers += [y_ave]
         q_totals += [q_tot]
