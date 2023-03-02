@@ -208,7 +208,7 @@ dist = 18.5 # pixel center to center diagonally asuming 4.4mm pixel pitch
 #Make function to do this too 
 
 #plot tracks:
-    
+'''    
 for event in eventData:
     if event_num == t[t_num]:
         t0 = event['ts_start']
@@ -243,5 +243,5 @@ for event in eventData:
         event_num +=1
         #print(event_num)
 
-
+'''
 
