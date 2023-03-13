@@ -25,9 +25,9 @@ def I_integral(target,beamcenter,I,dev):
         for y in Yvals:
             if ((x-tx)**2 + (y-ty)**2) <= radius**2:
                 val = Gaus(x,y,beamcenter,I,dev)
-                #integral += val*area
+                integral += val*area
                 
-                integral += val       #I dont think this is correct 
+                #integral += val       #I dont think this is correct 
     return integral
 
 
