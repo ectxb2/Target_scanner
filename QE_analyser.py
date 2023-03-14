@@ -146,10 +146,35 @@ for event in eventData:
             plt.text(x_centers[i],y_centers[i],' QE ~ '+str((QEs[i])))
             pairx = [x_centers[i],closest_xs[i]]
             pairy = [y_centers[i],closest_ys[i]]
-            plt.plot(pairx, pairy, color='r', linewidth=1, linestyle='--')
+            plt.plot(pairx, pairy, color='r', linewidth=1)
         
         plt.show()
         
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        xy_tracks = np.array([px,py]).T 
+        db = DBSCAN(eps = dist, min_samples=4).fit(xy_tracks)
+        x_centers , y_centers , q_totals = find_centers(db,px,py,q)
+        #Draw cluster center, target and write QE
+        #ax = draw_hits_dbscaned(event)
+        draw_boundaries(ax)
+        draw_labels(ax)  
+        plt.title('Target Centroid Change')
+        #plot cluster centers
+        #plt.scatter(x_centers,y_centers, s=30, c='k') 
+        #target_dists, closests_targets, closest_xs, closest_ys = center_dif(x_centers,y_centers,targets = all_targets)
+        #plot target centers
+        #plt.scatter(closest_xs, closest_ys, s = 30, c='b')
+        
+
+        plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
+        plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')  
+              
+        for i in range(0,len(x_centers)):
+            pairx = [x_centers[i],closest_xs[i]]
+            pairy = [y_centers[i],closest_ys[i]]
+            plt.plot(pairx, pairy, color='r', linewidth=1.5)        
+        plt.show()
         t_num += 1
         event_num +=1
     else : 
