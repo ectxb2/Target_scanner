@@ -6,24 +6,9 @@ from Target_centerDist import *
 from sklearn.cluster import DBSCAN
 import h5py
 
-'''Goals'''
-#get Q and cluster center from DBScan_tracks.py  DONE via copy and past info final loop
-
-#Compare center of cluster to center of target
-#	get target from target generator file
-#	plot difference ... somehow
-
-#Take location of target and get light integral of target
-
-#divide q by light to get QE for the targets
 
 
-
-
-
-
-
-#ex:
+#example run script :
 # python3 QE_analyser.py selftrigger_2022_08_05_00_04_09_PDT_evd.h5 78
 
 #Pass the function these things
@@ -39,7 +24,8 @@ drift_window = drift_distance/(v_drift*clock_interval) # maximum drift time
 drift_direction = 1 # +/- 1 depending on the direction of the drift in z
 beam_centers = {"left_beam": [-119.9,-3.82],
                "right_beam": [5.2,-3.82]}
-
+#beam center to be used in this run 
+beam_center = beam_centers["right_beam"]
 #Ligth paramiters
 I = 500000000
 dev = 400
@@ -81,7 +67,7 @@ def center_dif(x_center,y_center,targets = all_targets):
             ty = target_pos[1]*27 - 6*27
             cluster_target_dist = np.sqrt((x_centers[i] - (tx))**2 + (y_centers[i]-(ty))**2) 
             #distance between cluster and target, 27 converts to mm
-            print(cluster_target_dist)
+            
             if cluster_target_dist < shortest_dist:
                 shortest_dist = cluster_target_dist
                 closest_target = target
@@ -113,9 +99,18 @@ def get_targets(targets = all_targets):
             VD_target_ys += [ty]
     return(Az_target_xs,Az_target_ys,VD_target_xs,VD_target_ys)
 
+def measured_QE(closests_targets,beam_center,I,dev,q_totals):
+    QEs = []
+        
+    for i in range(0,len(closests_targets)):
+        target = closests_targets[i]
+        I =I_integral(target,beam_center,I,dev)
+        QEs += [q_totals[i]/I]
+    return(QEs)
    
 for event in eventData:
     if event_num == t[t_num]:
+        
         
         t0 = event['ts_start']
         tf = event['ts_end']
@@ -141,21 +136,12 @@ for event in eventData:
         #plot target centers
         #plt.scatter(closest_xs, closest_ys, s = 30, c='b')
         
-        QEs = []
-        
-        for i in range(0,len(closests_targets)):
-            target = closests_targets[i]
-            beam_center = beam_centers["right_beam"]
-            
-            I =I_integral(target,beam_center,I,dev)
-            print(I)
-            QEs += [q_totals[i]/I]
-            
+        QEs = measured_QE(closests_targets,beam_center,I,dev,q_totals)
         
         Az_target_xs,Az_target_ys,VD_target_xs,VD_target_ys = get_targets()
         plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
         plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')
-        print(QEs)
+        
         for i in range(0,len(x_centers)):
             plt.text(x_centers[i],y_centers[i],' QE ~ '+str((QEs[i])))
             pairx = [x_centers[i],closest_xs[i]]
