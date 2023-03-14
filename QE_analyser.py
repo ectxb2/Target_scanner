@@ -28,7 +28,7 @@ beam_centers = {"left_beam": [-119.9,-3.82],
 beam_center = beam_centers["right_beam"]
 #Ligth paramiters
 I = 500000000
-dev = 400
+dev = 800
 
 #f = h5py.File('selftrigger_2022_08_05_05_06_01_PDT_evd.h5')
 
@@ -101,12 +101,15 @@ def get_targets(targets = all_targets):
 
 def measured_QE(closests_targets,beam_center,I,dev,q_totals):
     QEs = []
-        
+    Is = []    
     for i in range(0,len(closests_targets)):
         target = closests_targets[i]
-        I =I_integral(target,beam_center,I,dev)
+        I = I_integral(target,beam_center,I,dev)
         QEs += [q_totals[i]/I]
-    return(QEs)
+        Is += [I]
+    return(QEs,Is)
+   
+   
    
 for event in eventData:
     if event_num == t[t_num]:
@@ -133,12 +136,10 @@ for event in eventData:
         #plot cluster centers
         plt.scatter(x_centers,y_centers, s=30, c='k') 
         target_dists, closests_targets, closest_xs, closest_ys = center_dif(x_centers,y_centers,targets = all_targets)
-        #plot target centers
         #plt.scatter(closest_xs, closest_ys, s = 30, c='b')
-        
-        QEs = measured_QE(closests_targets,beam_center,I,dev,q_totals)
-        
+        QEs,Is = measured_QE(closests_targets,beam_center,I,dev,q_totals)
         Az_target_xs,Az_target_ys,VD_target_xs,VD_target_ys = get_targets()
+        #plot all target centers
         plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
         plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')
         
@@ -149,6 +150,8 @@ for event in eventData:
             plt.plot(pairx, pairy, color='r', linewidth=1)
         
         plt.show()
+        
+        
         
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -166,7 +169,13 @@ for event in eventData:
         #plot target centers
         #plt.scatter(closest_xs, closest_ys, s = 30, c='b')
         
-
+        #add light contours
+        x = np.linspace(-150,150, num = 30)
+        y = np.linspace(-150,150, num = 30)
+        [X,Y] = np.meshgrid(x,y)
+        z_intensity = Gaus(X,Y,beam_center,I,dev)
+        plt.contour(x,y,z_intensity)
+        
         plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
         plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')  
               
@@ -175,6 +184,20 @@ for event in eventData:
             pairy = [y_centers[i],closest_ys[i]]
             plt.plot(pairx, pairy, color='r', linewidth=1.5)        
         plt.show()
+        
+        QE_fit, b = np.polyfit(Is,q_totals,1)
+        QE_line_label = 'Q = '+ str(QE_fit) + '* I + ' + str(b)
+        fitline = QE_fit*np.array(Is)+b
+        
+        plt.scatter(Is,q_totals)
+        plt.plot(Is, fitline, label = QE_line_label)
+        
+        plt.title('Intensity vs Charge Measured')
+        plt.ylabel('Total cluster charge')
+        plt.xlabel('Light on target')
+        plt.legend()
+        plt.show()
+        
         t_num += 1
         event_num +=1
     else : 
