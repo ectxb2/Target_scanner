@@ -44,7 +44,7 @@ eventHitRefs = f['charge']['events']['ref']['charge']['hits']['ref']
 event_num = 0
 t_num = 0
 
-#convert string from input to usable array
+#convert string from input to usable array for tracks of interest
 t = sys.argv[2].split(',')
 t = [eval(i) for i in t]
 dist = 18.5 # pixel center to center diagonally asuming 4.4mm pixel pitch 
