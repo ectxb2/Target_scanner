@@ -152,9 +152,10 @@ def draw_hits_dbscaned(event):
     eventHits = hitData[eventMask]
     px = np.array(eventHits['px'])
     py = np.array(eventHits['py'])  
-    
+    ts = np.array(eventHits['ts'])   #new line
     #xy_tracks = np.append(px,py,axis = 0)
-    xy_tracks = np.array([px,py]).T
+    #xy_tracks = np.array([px,py]).T
+    xy_tracks = np.array([px,py,ts]).T
         
     db = DBSCAN(eps = dist, min_samples=4).fit(xy_tracks)
     labels = db.labels_
@@ -219,7 +220,7 @@ for event in eventData:
         py = eventHits['py']
         ts = eventHits['ts']
         q = eventHits['q'] 
-        xy_tracks = np.array([px,py]).T 
+        xy_tracks = np.array([px,py,ts]).T 
         db = DBSCAN(eps = dist, min_samples=4).fit(xy_tracks)
         x_centers , y_centers , q_totals = find_centers(db,px,py,q)
         #Draw regular 2d charge projection
