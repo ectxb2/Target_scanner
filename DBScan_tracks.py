@@ -227,6 +227,7 @@ for event in eventData:
         ax = draw_hits_in_event_window_by_timestamp(event)
         draw_boundaries(ax)
         draw_labels(ax)
+        
         plt.show()
         #Draw clusters and centers
         
@@ -237,6 +238,7 @@ for event in eventData:
         plt.scatter(x_centers,y_centers, s=30, c='k') 
         for i in range(0,len(x_centers)):
             plt.text(x_centers[i],y_centers[i],'  Q = '+str(round(q_totals[i])))
+        plt.title('Charge Clusters and Centers')
         plt.show()
         t_num += 1
         event_num +=1
