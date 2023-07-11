@@ -142,13 +142,12 @@ for event in eventData:
         #plot all target centers
         plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
         plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')
-        
         for i in range(0,len(x_centers)):
-            plt.text(x_centers[i],y_centers[i],' QE ~ '+str((QEs[i])))
             pairx = [x_centers[i],closest_xs[i]]
             pairy = [y_centers[i],closest_ys[i]]
-            plt.plot(pairx, pairy, color='r', linewidth=1)
-        
+            plt.plot(pairx, pairy, color='r', linewidth=1.5) 
+
+        plt.title('Target Cantroid Displacement')
         plt.show()
         
         
@@ -179,10 +178,15 @@ for event in eventData:
         plt.scatter(Az_target_xs,Az_target_ys,s = 60, c='b')
         plt.scatter(VD_target_xs,VD_target_ys,s = 30, c='b')  
               
+        plt.scatter(x_centers,y_centers, s=30, c='k')
+        
         for i in range(0,len(x_centers)):
+            plt.text(x_centers[i],y_centers[i],' QE ~ '+str((QEs[i])))
             pairx = [x_centers[i],closest_xs[i]]
             pairy = [y_centers[i],closest_ys[i]]
-            plt.plot(pairx, pairy, color='r', linewidth=1.5)        
+            plt.plot(pairx, pairy, color='r', linewidth=1)
+                
+               
         plt.show()
         
         QE_fit, b = np.polyfit(Is,q_totals,1)
